@@ -1,0 +1,9 @@
+include LICENSE
+include README.rst
+
+recursive-include mezzanine_webinars/static *
+recursive-include mezzanine_webinars/templates *.html
+recursive-include mezzanine_webinars/locale *.mo *.po
+
+prune tests
+exclude .releaserc
