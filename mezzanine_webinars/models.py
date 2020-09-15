@@ -19,7 +19,9 @@ class Seminar(Displayable, RichText):
     Main content model that holds all the information about a seminar
     """
 
-    subjects = models.ManyToManyField(SeminarSubject, related_name="seminars")
+    subjects = models.ManyToManyField(
+        SeminarSubject, related_name="seminars", blank=True
+    )
     length = models.PositiveIntegerField(
         "Length", blank=True, null=True, help_text="Seminar duration in minutes"
     )
