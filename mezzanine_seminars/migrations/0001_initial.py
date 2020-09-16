@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                 ('content', mezzanine.core.fields.RichTextField(verbose_name='Content')),
                 ('_order', mezzanine.core.fields.OrderField(null=True, verbose_name='Order')),
                 ('title', models.CharField(max_length=100, verbose_name='Title')),
-                ('seminar', models.ForeignKey(related_name='content_areas', to='mezzanine_webinars.Seminar')),
+                ('seminar', models.ForeignKey(related_name='content_areas', to='mezzanine_seminars.Seminar')),
             ],
             options={
                 'ordering': ('_order',),
@@ -69,6 +69,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='seminar',
             name='subjects',
-            field=models.ManyToManyField(related_name='seminars', to='mezzanine_webinars.SeminarSubject'),
+            field=models.ManyToManyField(related_name='seminars', to='mezzanine_seminars.SeminarSubject'),
         ),
     ]

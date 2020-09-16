@@ -7,13 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mezzanine_webinars', '0001_initial'),
+        ('mezzanine_seminars', '0001_initial'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='seminar',
             name='subjects',
-            field=models.ManyToManyField(related_name='seminars', to='mezzanine_webinars.SeminarSubject', blank=True),
+            field=models.ManyToManyField(related_name='seminars', to='mezzanine_seminars.SeminarSubject', blank=True),
         ),
     ]
