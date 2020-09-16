@@ -1,0 +1,42 @@
+{% extends "pages/page.html" %}
+{% load mezzanine_tags keyword_tags %}
+
+{% block meta_title %}{{ seminar.meta_title }}{% endblock %}
+
+{% block meta_keywords %}{% metablock %}
+{% keywords_for seminar as keywords %}
+{% for keyword in keywords %}
+	{% if not forloop.first %}, {% endif %}
+	{{ keyword }}
+{% endfor %}
+{% endmetablock %}{% endblock %}
+
+{% block meta_description %}{% metablock %}
+{{ seminar.description }}
+{% endmetablock %}{% endblock %}
+
+{% block title %}
+	{{ seminar.title }}
+{% endblock title %}
+
+{% block left_panel %}
+	<ul class="list-unstyled">
+		<li>Price: {{ seminar.format_price }}</li>
+		<li>Length: {{ seminar.length|default:"N/A" }}</li>
+		<li>Subjects: {{ seminar.subjects.all|default:"None" }}</li>
+	</ul>
+{% endblock left_panel %}
+
+{% block main %}
+	{% if seminar.public_video_link %}
+		<a href="{{ seminar.public_video_link }}">Watch video</a>
+	{% endif %}
+	{{ seminar.content|richtext_filters|safe }}
+
+	{% for area in seminar.content_areas.all %}
+		<article>
+			<h2>{{ area.title }}</h2>
+			{{ area.content|richtext_filters|safe }}
+		</article>
+	{% endfor %}
+{% endblock main %}

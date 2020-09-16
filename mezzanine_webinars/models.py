@@ -1,6 +1,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from django.db import models
+from django.core.urlresolvers import reverse
 
 from mezzanine.core.models import Displayable, Slugged, RichText
 from mezzanine.core.fields import RichTextField
@@ -39,6 +40,14 @@ class Seminar(Displayable, RichText):
         help_text="Private video with the seminar content",
     )
     private_content = RichTextField("Private content")
+
+    def get_absolute_url(self):
+        return reverse("seminars:detail", args=[self.slug])
+
+    def format_price(self):
+        if self.price == 0:
+            return "Free"
+        return "${:,.2f}".format(self.price)
 
 
 class SeminarContentArea(TitledInline, RichText):
