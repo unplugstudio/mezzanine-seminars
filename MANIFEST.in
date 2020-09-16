@@ -7,3 +7,4 @@ recursive-include mezzanine_seminars/locale *.mo *.po
 
 prune tests
 exclude .releaserc
+exclude .editorconfig
