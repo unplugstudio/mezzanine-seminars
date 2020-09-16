@@ -25,7 +25,7 @@ class SeminarSubjectAdmin(admin.ModelAdmin):
 
 class SeminarContentAreaInlineAdmin(StackedDynamicInlineAdmin):
     model = SeminarContentArea
-    fields = ["title", "content"]
+    fields = ["title", "video_link", "content"]
 
 
 @admin.register(Seminar)
@@ -49,15 +49,7 @@ class SeminarAdmin(DisplayableAdmin):
         (
             "Public Content",
             {
-                "classes": ["collapse-closed"],
-                "fields": ["public_video_link", "content"],
-            },
-        ),
-        (
-            "Private Content",
-            {
-                "classes": ["collapse-closed"],
-                "fields": ["private_video_link", "private_content"],
+                "fields": ["preview_video_link", "content"],
             },
         ),
         # Copy the meta panel from PageAdmin

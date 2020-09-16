@@ -4,7 +4,6 @@ from django.db import models
 from django.core.urlresolvers import reverse
 
 from mezzanine.core.models import Displayable, Slugged, RichText
-from mezzanine.core.fields import RichTextField
 
 from mezzy.utils.models import TitledInline
 
@@ -27,19 +26,12 @@ class Seminar(Displayable, RichText):
         "Length", blank=True, null=True, help_text="Seminar duration in minutes"
     )
     price = models.DecimalField("Price", max_digits=8, decimal_places=2, default=0)
-    public_video_link = models.URLField(
-        "Public Video Link",
+    preview_video_link = models.URLField(
+        "Preview Video Link",
         max_length=200,
         blank=True,
         help_text="Publicly-accessible teaser or preview",
     )
-    private_video_link = models.URLField(
-        "Private Video Link",
-        max_length=200,
-        blank=True,
-        help_text="Private video with the seminar content",
-    )
-    private_content = RichTextField("Private content")
 
     def get_absolute_url(self):
         return reverse("seminars:detail", args=[self.slug])
@@ -58,3 +50,12 @@ class SeminarContentArea(TitledInline, RichText):
     seminar = models.ForeignKey(
         Seminar, on_delete=models.CASCADE, related_name="content_areas"
     )
+    video_link = models.URLField(
+        "Video Link",
+        max_length=200,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "content area"
+        verbose_name_plural = "content areas"

@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('content', mezzanine.core.fields.RichTextField(verbose_name='Content')),
                 ('length', models.PositiveIntegerField(help_text='Seminar duration in minutes', null=True, verbose_name='Length', blank=True)),
                 ('price', models.DecimalField(default=0, verbose_name='Price', max_digits=8, decimal_places=2)),
-                ('public_video_link', models.URLField(help_text='Publicly-accessible teaser or preview', verbose_name='Public Video Link', blank=True)),
+                ('public_video_link', models.URLField(help_text='Publicly-accessible teaser or preview', verbose_name='Preview Video Link', blank=True)),
                 ('private_video_link', models.URLField(help_text='Private video with the seminar content', verbose_name='Private Video Link', blank=True)),
                 ('private_content', mezzanine.core.fields.RichTextField(verbose_name='Private content')),
                 ('site', models.ForeignKey(editable=False, to='sites.Site')),
