@@ -18,12 +18,22 @@ class SeminarDetailView(generic.DetailView):
 
 class SeminarListView(generic.TemplateView):
     template_name = "seminars/seminar_list.html"
+    template_name_ajax = "seminars/includes/seminar_list_ajax.html"
 
     def get_queryset(self):
         qs = Seminar.objects.published(for_user=self.request.user)
         if self.request.GET.get("q"):
             qs = qs.search(self.request.GET["q"])
         return qs
+
+    def get_template_names(self):
+        """
+        Load a different template for AJAX requests
+        """
+        templates = super(SeminarListView, self).get_template_names()
+        if self.request.is_ajax():
+            templates.insert(0, self.template_name_ajax)
+        return templates
 
     def get_context_data(self, **kwargs):
         kwargs.update(
