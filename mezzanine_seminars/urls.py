@@ -5,5 +5,6 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r"^(?P<slug>[\w-]+)/$", views.SeminarDetailView.as_view(), name="detail")
+    url(r"^$", views.SeminarListView.as_view(), name="list"),
+    url(r"^(?P<slug>[\w-]+)/$", views.SeminarDetailView.as_view(), name="detail"),
 ]
