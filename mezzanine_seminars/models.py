@@ -3,6 +3,7 @@ from __future__ import unicode_literals, absolute_import
 from django.db import models
 from django.core.urlresolvers import reverse
 
+from mezzanine.core.fields import FileField
 from mezzanine.core.models import Displayable, Slugged, RichText
 
 from mezzy.utils.models import TitledInline
@@ -19,6 +20,12 @@ class Seminar(Displayable, RichText):
     Main content model that holds all the information about a seminar
     """
 
+    featured_image = FileField(
+        "Featured image", format="Image", blank=True, upload_to="seminars"
+    )
+    featured = models.BooleanField(
+        "Featured", default=False, help_text="Highlight this item above others"
+    )
     subjects = models.ManyToManyField(
         SeminarSubject, related_name="seminars", blank=True
     )
@@ -40,6 +47,9 @@ class Seminar(Displayable, RichText):
         if self.price == 0:
             return "Free"
         return "${:,.2f}".format(self.price)
+
+    class Meta:
+        ordering = ["-featured", "-publish_date"]
 
 
 class SeminarContentArea(TitledInline, RichText):

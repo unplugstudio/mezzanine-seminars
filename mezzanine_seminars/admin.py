@@ -31,6 +31,9 @@ class SeminarContentAreaInlineAdmin(StackedDynamicInlineAdmin):
 @admin.register(Seminar)
 class SeminarAdmin(DisplayableAdmin):
     inlines = [SeminarContentAreaInlineAdmin]
+    list_display = ["title", "publish_date", "status", "featured", "admin_link"]
+    list_filter = ["status", "featured"]
+    list_editable = ["status", "featured"]
     filter_horizontal = ["subjects"]
     fieldsets = [
         (
@@ -40,6 +43,8 @@ class SeminarAdmin(DisplayableAdmin):
                     "title",
                     "status",
                     ("publish_date", "expiry_date"),
+                    "featured_image",
+                    "featured",
                     "length",
                     "price",
                     "subjects",
