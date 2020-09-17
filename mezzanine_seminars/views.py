@@ -20,7 +20,10 @@ class SeminarListView(generic.TemplateView):
     template_name = "seminars/seminar_list.html"
 
     def get_queryset(self):
-        return Seminar.objects.published(for_user=self.request.user)
+        qs = Seminar.objects.published(for_user=self.request.user)
+        if self.request.GET.get("q"):
+            qs = qs.search(self.request.GET["q"])
+        return qs
 
     def get_context_data(self, **kwargs):
         kwargs.update(
