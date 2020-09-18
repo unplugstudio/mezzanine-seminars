@@ -6,7 +6,7 @@ from django.contrib import admin
 
 from mezzanine.core.admin import DisplayableAdmin, StackedDynamicInlineAdmin
 
-from .models import Seminar, SeminarSubject, SeminarContentArea
+from .models import Seminar, SeminarSubject, SeminarContentArea, SeminarRegistration
 
 ###########
 # Subject #
@@ -59,4 +59,51 @@ class SeminarAdmin(DisplayableAdmin):
         ),
         # Copy the meta panel from PageAdmin
         deepcopy(DisplayableAdmin.fieldsets[1]),
+    ]
+
+
+#################
+# Registrations #
+#################
+
+
+@admin.register(SeminarRegistration)
+class SeminarRegistrationAdmin(admin.ModelAdmin):
+    date_hierarchy = "created"
+    readonly_fields = ["created", "updated", "seminar", "purchaser"]
+    list_filter = ["purchaser", "seminar"]
+    list_display = [
+        "__str__",
+        "seminar",
+        "created",
+        "payment_method",
+        "transaction_id",
+    ]
+    search_fields = [
+        "purchaser__first_name",
+        "purchaser__last_name",
+        "purchaser__email",
+        "transaction_id",
+        "payment_method",
+    ]
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": [
+                    ("created", "updated"),
+                    ("purchaser", "seminar"),
+                    "price",
+                    "payment_method",
+                    "transaction_id",
+                ]
+            },
+        ),
+        (
+            "Notes",
+            {
+                "classes": ["collapse-closed"],
+                "fields": ["transaction_notes"],
+            },
+        ),
     ]
