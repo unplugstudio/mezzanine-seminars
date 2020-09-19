@@ -104,7 +104,7 @@ class SeminarListView(generic.TemplateView):
                     objects=self.get_queryset(),
                     page_num=self.request.GET.get("page", 1),
                     per_page=settings.BLOG_POST_PER_PAGE,
-                    max_paging_links=10,
+                    max_paging_links=settings.MAX_PAGING_LINKS,
                 )
             }
         )
