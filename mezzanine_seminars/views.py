@@ -12,24 +12,13 @@ from mezzanine.utils.importing import import_dotted_path
 
 from mezzy.utils.decorators import method_decorator
 
-from .models import Seminar
+from .models import Seminar, SeminarRegistration
 
 
-class SeminarDetailView(generic.DetailView):
-    template_name = "seminars/seminar_detail.html"
-    context_object_name = "seminar"
-
-    def get_queryset(self):
-        return Seminar.objects.published()
-
-
-@method_decorator(login_required, "dispatch")
-class SeminarRegistrationCreate(generic.CreateView):
+class SeminarDetailMixin(object):
     """
-    Let's users pay and register for a seminar.
+    Base class for any view related to a single seminar
     """
-
-    template_name = "seminars/registration_create.html"
 
     @cached_property
     def seminar(self):
@@ -38,8 +27,39 @@ class SeminarRegistrationCreate(generic.CreateView):
             slug=self.kwargs.get("slug"),
         )
 
+    @cached_property
+    def registration(self):
+        try:
+            return SeminarRegistration.objects.get(
+                seminar=self.seminar, purchaser=self.request.user
+            )
+        except (SeminarRegistration.DoesNotExist, TypeError):
+            # User not registered or not logged in
+            return None
+
+    def get_context_data(self, **kwargs):
+        kwargs.update({"seminar": self.seminar, "registration": self.registration})
+        return super(SeminarDetailMixin, self).get_context_data(**kwargs)
+
+
+class SeminarDetailView(SeminarDetailMixin, generic.TemplateView):
+    """
+    Shows seminar details to registered and non-registered users
+    """
+
+    template_name = "seminars/seminar_detail.html"
+
+
+@method_decorator(login_required, "dispatch")
+class SeminarRegistrationCreate(SeminarDetailMixin, generic.CreateView):
+    """
+    Let's users pay and register for a seminar.
+    """
+
+    template_name = "seminars/registration_create.html"
+
     def dispatch(self, request, *args, **kwargs):
-        if self.seminar.registrations.filter(purchaser=request.user).exists():
+        if self.registration:
             messages.info(
                 request,
                 "You are already registered for this seminar",
@@ -59,10 +79,6 @@ class SeminarRegistrationCreate(generic.CreateView):
         kwargs = super(SeminarRegistrationCreate, self).get_form_kwargs()
         kwargs.update({"seminar": self.seminar, "purchaser": self.request.user})
         return kwargs
-
-    def get_context_data(self, **kwargs):
-        kwargs.update({"seminar": self.seminar})
-        return super(SeminarRegistrationCreate, self).get_context_data(**kwargs)
 
     def get_success_url(self):
         """
