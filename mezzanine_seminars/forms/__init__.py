@@ -39,12 +39,15 @@ class BaseSeminarRegistrationForm(forms.ModelForm):
         Execute the transaction when cleaning the form.
         This way payment gateway errors are treated as validation errors.
         """
-        super(BaseSeminarRegistrationForm, self).clean()
+        cleaned_data = super(BaseSeminarRegistrationForm, self).clean()
+        if self.errors:  # Standard validation failed already, don't continue
+            return cleaned_data
         details = self.execute_transaction()
         for k in TRANSACTION_KEYS:
             if k not in details:
                 raise ValueError(MISSING_KEY.format(k, self.__class__))
-        self.cleaned_data.update(details)
+        cleaned_data.update(details)
+        return cleaned_data
 
     def save(self, *args, **kwargs):
         """
