@@ -1,4 +1,4 @@
-# Mezzy
+# Mezzanine Seminars
 
 Seminar platform for [Mezzanine](http://mezzanine.jupo.org/) sites
 
