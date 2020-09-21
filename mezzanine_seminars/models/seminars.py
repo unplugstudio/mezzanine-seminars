@@ -42,6 +42,9 @@ class Seminar(Displayable, RichText):
         help_text="Publicly-accessible teaser or preview",
     )
 
+    class Meta:
+        ordering = ["-featured", "-publish_date"]
+
     def get_absolute_url(self):
         return reverse("seminars:detail", args=[self.slug])
 
@@ -58,9 +61,6 @@ class Seminar(Displayable, RichText):
     def get_subjects_display(self):
         string = ", ".join(self.subjects.values_list("title", flat=True))
         return string or "Uncategorized"
-
-    class Meta:
-        ordering = ["-featured", "-publish_date"]
 
 
 class SeminarContentArea(TitledInline, RichText):
