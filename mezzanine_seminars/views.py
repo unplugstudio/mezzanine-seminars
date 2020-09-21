@@ -88,6 +88,8 @@ class SeminarRegistrationCreate(SeminarDetailMixin, generic.CreateView):
         Import the registration form from settings.
         Allows swapping out payment processors by swapping the form.
         """
+        if self.form_class:  # Respect the class attribute override
+            return self.form_class
         return import_dotted_path(settings.SEMINARS_REGISTRATION_FORM)
 
     def get_form_kwargs(self):
@@ -104,7 +106,7 @@ class SeminarRegistrationCreate(SeminarDetailMixin, generic.CreateView):
             "You are now registered for this seminar",
             fail_silently=True,
         )
-        if self.success_url:  # Proceed as usual if a URL has been set
+        if self.success_url:  # Respect the class attribute override
             return super(SeminarRegistrationCreate, self).get_success_url()
         return self.seminar.get_absolute_url()
 
