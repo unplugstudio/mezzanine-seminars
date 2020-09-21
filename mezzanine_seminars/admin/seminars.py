@@ -4,9 +4,19 @@ from copy import deepcopy
 
 from django.contrib import admin
 
-from mezzanine.core.admin import DisplayableAdmin, StackedDynamicInlineAdmin
+from mezzanine.core.admin import (
+    DisplayableAdmin,
+    StackedDynamicInlineAdmin,
+    TabularDynamicInlineAdmin,
+)
 
-from .models import Seminar, SeminarSubject, SeminarContentArea, SeminarRegistration
+from ..models import (
+    Seminar,
+    SeminarSubject,
+    SeminarContentArea,
+    SeminarRegistration,
+    SurveyQuestion,
+)
 
 ###########
 # Subject #
@@ -28,9 +38,15 @@ class SeminarContentAreaInlineAdmin(StackedDynamicInlineAdmin):
     fields = ["title", "video_link", "content"]
 
 
+class SurveyQuestionInlineAdmin(TabularDynamicInlineAdmin):
+    model = SurveyQuestion
+    fields = ["prompt", "field_type", "required"]
+    radio_fields = {"field_type": admin.HORIZONTAL}
+
+
 @admin.register(Seminar)
 class SeminarAdmin(DisplayableAdmin):
-    inlines = [SeminarContentAreaInlineAdmin]
+    inlines = [SeminarContentAreaInlineAdmin, SurveyQuestionInlineAdmin]
     list_display = ["title", "publish_date", "status", "featured", "admin_link"]
     list_filter = ["status", "featured"]
     list_editable = ["status", "featured"]
