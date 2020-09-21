@@ -11,5 +11,10 @@ urlpatterns = [
         views.SeminarRegistrationCreate.as_view(),
         name="registration_create",
     ),
+    url(
+        r"^(?P<slug>[\w-]+)/survey/$",
+        views.SurveyResponseCreate.as_view(),
+        name="survey_response_create",
+    ),
     url(r"^(?P<slug>[\w-]+)/$", views.SeminarDetailView.as_view(), name="detail"),
 ]

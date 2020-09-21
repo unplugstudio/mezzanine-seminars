@@ -6,3 +6,9 @@ register_setting(
     editable=False,
     default="mezzanine_seminars.forms.SeminarRegistrationForm",
 )
+
+register_setting(
+    name="SEMINARS_SURVEY_FORM",
+    editable=False,
+    default="mezzanine_seminars.forms.surveys.SurveyResponseForm",
+)

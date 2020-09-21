@@ -12,7 +12,7 @@ from mezzanine.utils.importing import import_dotted_path
 
 from mezzy.utils.decorators import method_decorator
 
-from .models import Seminar, SeminarRegistration
+from .models import Seminar, SeminarRegistration, SurveyResponse
 
 
 class SeminarDetailMixin(object):
@@ -37,8 +37,23 @@ class SeminarDetailMixin(object):
             # User not registered or not logged in
             return None
 
+    @cached_property
+    def survey_response(self):
+        if self.registration is None:
+            return None
+        try:
+            return SurveyResponse.objects.get(registration=self.registration)
+        except SurveyResponse.DoesNotExist:
+            return None
+
     def get_context_data(self, **kwargs):
-        kwargs.update({"seminar": self.seminar, "registration": self.registration})
+        kwargs.update(
+            {
+                "seminar": self.seminar,
+                "registration": self.registration,
+                "survey_response": self.survey_response,
+            }
+        )
         return super(SeminarDetailMixin, self).get_context_data(**kwargs)
 
 
@@ -91,6 +106,55 @@ class SeminarRegistrationCreate(SeminarDetailMixin, generic.CreateView):
         )
         if self.success_url:  # Proceed as usual if a URL has been set
             return super(SeminarRegistrationCreate, self).get_success_url()
+        return self.seminar.get_absolute_url()
+
+
+@method_decorator(login_required, "dispatch")
+class SurveyResponseCreate(SeminarDetailMixin, generic.CreateView):
+    """
+    Let's users answer the survey for seminars they are registered in
+    """
+
+    template_name = "seminars/survey_response_create.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.registration:
+            messages.info(
+                request,
+                "Please register for this seminar before answering the survey",
+                fail_silently=True,
+            )
+            return redirect(self.seminar)
+        if self.survey_response:
+            messages.info(
+                request,
+                "You already completed the survey for this seminar",
+                fail_silently=True,
+            )
+            return redirect(self.seminar)
+        return super(SurveyResponseCreate, self).dispatch(request, *args, **kwargs)
+
+    def get_form_class(self):
+        """
+        Import the survey form from settings for easy swapping.
+        """
+        if self.form_class:  # Respect the class attribute override
+            return self.form_class
+        return import_dotted_path(settings.SEMINARS_SURVEY_FORM)
+
+    def get_form_kwargs(self):
+        kwargs = super(SurveyResponseCreate, self).get_form_kwargs()
+        kwargs.update({"registration": self.registration})
+        return kwargs
+
+    def get_success_url(self):
+        messages.success(
+            self.request,
+            "Your survey response has been submitted.",
+            fail_silently=True,
+        )
+        if self.success_url:  # Respect the class attribute override
+            return super(SurveyResponseCreate, self).get_success_url()
         return self.seminar.get_absolute_url()
 
 
