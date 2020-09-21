@@ -3,15 +3,25 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import mezzanine.core.fields
+from django.conf import settings
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ('sites', '0001_initial'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
+        migrations.CreateModel(
+            name='QuestionResponse',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('rating', models.PositiveSmallIntegerField(null=True, verbose_name='Rating', blank=True)),
+                ('text_response', models.TextField(verbose_name='Text response', blank=True)),
+            ],
+        ),
         migrations.CreateModel(
             name='Seminar',
             fields=[
@@ -30,15 +40,15 @@ class Migration(migrations.Migration):
                 ('short_url', models.URLField(null=True, blank=True)),
                 ('in_sitemap', models.BooleanField(default=True, verbose_name='Show in sitemap')),
                 ('content', mezzanine.core.fields.RichTextField(verbose_name='Content')),
+                ('featured_image', mezzanine.core.fields.FileField(max_length=255, verbose_name='Featured image', blank=True)),
+                ('featured', models.BooleanField(default=False, help_text='Highlight this item above others', verbose_name='Featured')),
                 ('length', models.PositiveIntegerField(help_text='Seminar duration in minutes', null=True, verbose_name='Length', blank=True)),
                 ('price', models.DecimalField(default=0, verbose_name='Price', max_digits=8, decimal_places=2)),
-                ('public_video_link', models.URLField(help_text='Publicly-accessible teaser or preview', verbose_name='Preview Video Link', blank=True)),
-                ('private_video_link', models.URLField(help_text='Private video with the seminar content', verbose_name='Private Video Link', blank=True)),
-                ('private_content', mezzanine.core.fields.RichTextField(verbose_name='Private content')),
+                ('preview_video_link', models.URLField(help_text='Publicly-accessible teaser or preview', verbose_name='Preview Video Link', blank=True)),
                 ('site', models.ForeignKey(editable=False, to='sites.Site')),
             ],
             options={
-                'abstract': False,
+                'ordering': ['-featured', '-publish_date'],
             },
         ),
         migrations.CreateModel(
@@ -48,11 +58,28 @@ class Migration(migrations.Migration):
                 ('content', mezzanine.core.fields.RichTextField(verbose_name='Content')),
                 ('_order', mezzanine.core.fields.OrderField(null=True, verbose_name='Order')),
                 ('title', models.CharField(max_length=100, verbose_name='Title')),
+                ('video_link', models.URLField(verbose_name='Video Link', blank=True)),
                 ('seminar', models.ForeignKey(related_name='content_areas', to='mezzanine_seminars.Seminar')),
             ],
             options={
                 'ordering': ('_order',),
+                'verbose_name': 'content area',
+                'verbose_name_plural': 'content areas',
             },
+        ),
+        migrations.CreateModel(
+            name='SeminarRegistration',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', models.DateTimeField(null=True, editable=False)),
+                ('updated', models.DateTimeField(null=True, editable=False)),
+                ('price', models.DecimalField(default=0, verbose_name='Price', max_digits=8, decimal_places=2)),
+                ('payment_method', models.CharField(max_length=100, verbose_name='Payment method')),
+                ('transaction_id', models.CharField(max_length=100, verbose_name='Transaction ID', blank=True)),
+                ('transaction_notes', models.TextField(verbose_name='Transaction notes', blank=True)),
+                ('purchaser', models.ForeignKey(related_name='seminar_registrations', to=settings.AUTH_USER_MODEL)),
+                ('seminar', models.ForeignKey(related_name='registrations', to='mezzanine_seminars.Seminar')),
+            ],
         ),
         migrations.CreateModel(
             name='SeminarSubject',
@@ -66,9 +93,49 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
+        migrations.CreateModel(
+            name='SurveyQuestion',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('_order', mezzanine.core.fields.OrderField(null=True, verbose_name='Order')),
+                ('field_type', models.IntegerField(verbose_name='Question type', choices=[(1, 'Rating'), (2, 'Text')])),
+                ('prompt', models.CharField(max_length=300, verbose_name='Prompt')),
+                ('required', models.BooleanField(default=True, verbose_name='Required')),
+                ('seminar', models.ForeignKey(related_name='survey_questions', to='mezzanine_seminars.Seminar')),
+            ],
+            options={
+                'ordering': ('_order',),
+            },
+        ),
+        migrations.CreateModel(
+            name='SurveyResponse',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', models.DateTimeField(null=True, editable=False)),
+                ('updated', models.DateTimeField(null=True, editable=False)),
+                ('registration', models.OneToOneField(related_name='survey_response', to='mezzanine_seminars.SeminarRegistration')),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
         migrations.AddField(
             model_name='seminar',
             name='subjects',
-            field=models.ManyToManyField(related_name='seminars', to='mezzanine_seminars.SeminarSubject'),
+            field=models.ManyToManyField(related_name='seminars', to='mezzanine_seminars.SeminarSubject', blank=True),
+        ),
+        migrations.AddField(
+            model_name='questionresponse',
+            name='question',
+            field=models.ForeignKey(related_name='responses', to='mezzanine_seminars.SurveyQuestion'),
+        ),
+        migrations.AddField(
+            model_name='questionresponse',
+            name='response',
+            field=models.ForeignKey(related_name='responses', to='mezzanine_seminars.SurveyResponse'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='seminarregistration',
+            unique_together=set([('purchaser', 'seminar')]),
         ),
     ]
