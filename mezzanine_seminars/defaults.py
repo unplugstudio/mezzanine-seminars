@@ -12,3 +12,9 @@ register_setting(
     editable=False,
     default="mezzanine_seminars.forms.surveys.SurveyResponseForm",
 )
+
+register_setting(
+    name="SEMINARS_PER_PAGE",
+    editable=False,
+    default=10,
+)
