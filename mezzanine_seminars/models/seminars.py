@@ -45,10 +45,19 @@ class Seminar(Displayable, RichText):
     def get_absolute_url(self):
         return reverse("seminars:detail", args=[self.slug])
 
-    def format_price(self):
+    def get_price_display(self):
         if self.price == 0:
             return "Free"
         return "${:,.2f}".format(self.price)
+
+    def get_length_display(self):
+        if self.length is None:
+            return "N/A"
+        return "{} min.".format(self.length)
+
+    def get_subjects_display(self):
+        string = ", ".join(self.subjects.values_list("title", flat=True))
+        return string or "Uncategorized"
 
     class Meta:
         ordering = ["-featured", "-publish_date"]
