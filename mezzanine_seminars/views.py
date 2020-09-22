@@ -66,7 +66,7 @@ class SeminarDetailView(SeminarDetailMixin, generic.TemplateView):
 
 
 @method_decorator(login_required, "dispatch")
-class SeminarRegistrationCreate(SeminarDetailMixin, generic.CreateView):
+class SeminarRegistrationCreateView(SeminarDetailMixin, generic.CreateView):
     """
     Let's users pay and register for a seminar.
     """
@@ -81,7 +81,9 @@ class SeminarRegistrationCreate(SeminarDetailMixin, generic.CreateView):
                 fail_silently=True,
             )
             return redirect(self.seminar)
-        return super(SeminarRegistrationCreate, self).dispatch(request, *args, **kwargs)
+        return super(SeminarRegistrationCreateView, self).dispatch(
+            request, *args, **kwargs
+        )
 
     def get_form_class(self):
         """
@@ -93,7 +95,7 @@ class SeminarRegistrationCreate(SeminarDetailMixin, generic.CreateView):
         return import_dotted_path(settings.SEMINARS_REGISTRATION_FORM)
 
     def get_form_kwargs(self):
-        kwargs = super(SeminarRegistrationCreate, self).get_form_kwargs()
+        kwargs = super(SeminarRegistrationCreateView, self).get_form_kwargs()
         kwargs.update({"seminar": self.seminar, "purchaser": self.request.user})
         return kwargs
 
@@ -107,12 +109,12 @@ class SeminarRegistrationCreate(SeminarDetailMixin, generic.CreateView):
             fail_silently=True,
         )
         if self.success_url:  # Respect the class attribute override
-            return super(SeminarRegistrationCreate, self).get_success_url()
+            return super(SeminarRegistrationCreateView, self).get_success_url()
         return self.seminar.get_absolute_url()
 
 
 @method_decorator(login_required, "dispatch")
-class SurveyResponseCreate(SeminarDetailMixin, generic.CreateView):
+class SurveyResponseCreateView(SeminarDetailMixin, generic.CreateView):
     """
     Let's users answer the survey for seminars they are registered in
     """
@@ -134,7 +136,7 @@ class SurveyResponseCreate(SeminarDetailMixin, generic.CreateView):
                 fail_silently=True,
             )
             return redirect(self.seminar)
-        return super(SurveyResponseCreate, self).dispatch(request, *args, **kwargs)
+        return super(SurveyResponseCreateView, self).dispatch(request, *args, **kwargs)
 
     def get_form_class(self):
         """
@@ -145,7 +147,7 @@ class SurveyResponseCreate(SeminarDetailMixin, generic.CreateView):
         return import_dotted_path(settings.SEMINARS_SURVEY_FORM)
 
     def get_form_kwargs(self):
-        kwargs = super(SurveyResponseCreate, self).get_form_kwargs()
+        kwargs = super(SurveyResponseCreateView, self).get_form_kwargs()
         kwargs.update({"registration": self.registration})
         return kwargs
 
@@ -156,7 +158,7 @@ class SurveyResponseCreate(SeminarDetailMixin, generic.CreateView):
             fail_silently=True,
         )
         if self.success_url:  # Respect the class attribute override
-            return super(SurveyResponseCreate, self).get_success_url()
+            return super(SurveyResponseCreateView, self).get_success_url()
         return self.seminar.get_absolute_url()
 
 
