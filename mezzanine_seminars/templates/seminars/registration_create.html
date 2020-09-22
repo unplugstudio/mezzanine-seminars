@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load mezzanine_tags %}
+
+{% block meta_title %}{{ seminar.meta_title }}{% endblock %}
+
+{% block title %}{{ seminar.title }}{% endblock %}
+
+{% block main %}
+	{% errors_for form %}
+
+	<form action="" method="POST">
+		{% fields_for form %}
+		<p>You are about to enroll on {{ seminar.title }}</p>
+		<p><input type="submit" value="Enroll" class="btn btn-primary"></p>
+	</form>
+{% endblock main %}

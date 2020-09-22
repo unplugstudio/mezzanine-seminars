@@ -1,0 +1,56 @@
+{% extends "pages/page.html" %}
+{% load mezzanine_tags %}
+
+{% block meta_title %}
+	{% if page %}
+		{{ block.super }}
+	{% else %}
+		Seminars
+	{% endif %}
+{% endblock meta_title %}
+
+{% block title %}{{ page.title|default:"Seminars" }}{% endblock %}
+
+{% block right_panel %}
+	<form action="" method="GET" class="form-inline" id="seminar-search">
+		<div class="form-group">
+			<label for="seminar-q">Search</label>
+			<input id="seminar-q" type="text" class="form-control" name="q" value="{{ request.GET.q }}">
+		</div>
+		<button class="btn btn-default" type="submit">Submit</button>
+	</form>
+{% endblock right_panel %}
+
+{% block main %}
+	<div class="row">
+		<div class="col-md-7">
+			<p class="lead">
+				{% if seminars %}
+					Viewing {{ seminars|length }} Seminars
+				{% else %}
+					No seminars found
+				{% endif %}
+			</p>
+		</div>
+	</div>
+
+	<div class="row">
+		{% for seminar in seminars %}
+			<article class="col-md-6">
+				{% if seminar.featured_image %}
+					<a href="{{ seminar.get_absolute_url }}">
+						<img src="{{ MEDIA_URL }}{% thumbnail seminar.featured_image 350 0 %}" alt="" class="img-responsive">
+					</a>
+				{% endif %}
+				<h3>
+					<a href="{{ seminar.get_absolute_url }}">{{ seminar.title }}</a>
+					<small>{{ seminar.get_price_display }}</small>
+				</h3>
+				<p>{{ seminar.description }}</p>
+				<hr>
+			</article>
+		{% endfor %}
+	</div>
+
+	{% pagination_for seminars %}
+{% endblock main %}

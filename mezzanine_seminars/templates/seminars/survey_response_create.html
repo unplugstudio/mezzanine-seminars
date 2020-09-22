@@ -1,0 +1,31 @@
+{% extends "pages/page.html" %}
+{% load mezzanine_tags %}
+
+{% block meta_title %}{{ seminar.meta_title }}{% endblock %}
+
+{% block title %}{{ seminar.title }}{% endblock %}
+
+{% block right_panel %}
+	{% if seminar.featured_image %}
+		<img src="{{ MEDIA_URL }}{% thumbnail seminar.featured_image 400 0 %}" alt="" class="img-responsive">
+	{% endif %}
+	<h3>{{ seminar.title }}</h3>
+	<p>{{ seminar.description }}</p>
+	<p>
+		<a href="{{ seminar.get_absolute_url }}">Back to seminar</a>
+	</p>
+{% endblock right_panel %}
+
+{% block main %}
+	<h2>Post Seminar Survey</h2>
+	<p><strong>Complete each question to share your opinion about this seminar.</strong></p>
+	<p>1 = Disagree / 5 = Agree</p>
+
+	{% errors_for form %}
+	<form action="" method="POST" class="survey-form">
+		{% fields_for form %}
+		<p class="_text-center">
+			<input type="submit" value="Submit" class="btn btn-primary">
+		</p>
+	</form>
+{% endblock main %}

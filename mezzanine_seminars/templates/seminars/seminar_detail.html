@@ -15,28 +15,62 @@
 {{ seminar.description }}
 {% endmetablock %}{% endblock %}
 
-{% block title %}
-	{{ seminar.title }}
-{% endblock title %}
+{% block title %}{{ seminar.title }}{% endblock %}
 
-{% block left_panel %}
+{% block right_panel %}
+	{% if seminar.featured_image %}
+		<img src="{{ MEDIA_URL }}{% thumbnail seminar.featured_image 400 0 %}" alt="" class="img-responsive">
+	{% endif %}
+	<h3>{{ seminar.title }}</h3>
 	<ul class="list-unstyled">
-		<li>Price: {{ seminar.format_price }}</li>
-		<li>Length: {{ seminar.length|default:"N/A" }}</li>
-		<li>Subjects: {{ seminar.subjects.all|default:"None" }}</li>
+		<li>Price: {{ seminar.get_price_display }}</li>
+		<li>Length: {{ seminar.get_length_display }}</li>
+		<li>Subjects: {{ seminar.get_subjects_display }}</li>
 	</ul>
-{% endblock left_panel %}
+	<p>
+		{% if registration %}
+			<strong>You registered for this seminar on {{ registration.created|date }}</strong>
+		{% else %}
+			<a href="{% url 'seminars:registration_create' seminar.slug %}" class="btn btn-primary">Register</a>
+		{% endif %}
+	</p>
+	<p><a href="{% url 'seminars:list' %}">Browse all seminars</a></p>
+{% endblock right_panel %}
 
 {% block main %}
-	{% if seminar.public_video_link %}
-		<a href="{{ seminar.public_video_link }}">Watch video</a>
-	{% endif %}
-	{{ seminar.content|richtext_filters|safe }}
+	{# Private content #}
+	{% if registration %}
+		<ul class="nav nav-tabs" role="tablist" style="margin-bottom: 15px">
+			{% for area in seminar.content_areas.all %}
+				<li role="presentation" {% if forloop.first %}class="active"{% endif %}>
+					<a href="#content-{{ area.pk }}" role="tab" data-toggle="tab">{{ area.title }}</a>
+				</li>
+			{% endfor %}
+		</ul>
+		<div class="tab-content">
+			{% for area in seminar.content_areas.all %}
+				<div
+					role="tabpanel"
+					class="tab-pane {% if forloop.first %}active{% endif %}"
+					id="content-{{ area.pk }}"
+				>
+					{{ area.content|richtext_filters|safe }}
+				</div>
+			{% endfor %}
+		</div>
 
-	{% for area in seminar.content_areas.all %}
-		<article>
-			<h2>{{ area.title }}</h2>
-			{{ area.content|richtext_filters|safe }}
-		</article>
-	{% endfor %}
+		<p>
+			{% if survey_response %}
+				<strong>You took the seminar survey on {{ survey_response.created|date }}.</strong>
+			{% else %}
+				<a href="{% url 'seminars:survey_response_create' seminar.slug %}" class="btn btn-primary">
+					Complete the post seminar survey
+				</a>
+			{% endif %}
+		</p>
+
+	{# Public content #}
+	{% else %}
+		{{ seminar.content|richtext_filters|safe }}
+	{% endif %}
 {% endblock main %}
