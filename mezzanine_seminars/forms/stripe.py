@@ -23,6 +23,14 @@ class StripeRegistrationForm(BaseSeminarRegistrationForm):
         Connect to Stripe to execute the transaction
         https://stripe.com/docs/payments/accept-a-payment-synchronously
         """
+        if self.seminar.price == 0:
+            # Don't talk to Stripe if the seminar is free
+            return {
+                "payment_method": "Complimentary",
+                "transaction_id": "",
+                "transaction_notes": "",
+            }
+
         payment_method_id = self.cleaned_data.get("stripe_method")
         payment_intent_id = self.cleaned_data.get("stripe_intent")
         try:
