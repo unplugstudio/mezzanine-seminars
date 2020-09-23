@@ -1,5 +1,6 @@
 from __future__ import unicode_literals, absolute_import
 
+import json
 import mock
 import pytest
 
@@ -83,9 +84,9 @@ class TestStripe(WebTestBase):
         self.assertEqual(reg.price, seminar.price)
         self.assertEqual(reg.payment_method, "Stripe")
         self.assertEqual(reg.transaction_id, "mock id")
-        self.assertEqual(
-            reg.transaction_notes,
-            '{\n  "id": "mock id", \n  "mock_key": "mock_value"\n}',
+        self.assertDictEqual(
+            json.loads(reg.transaction_notes),
+            {"id": "mock id", "mock_key": "mock_value"},
         )
 
         # User should be redirected to the seminar page if they try to register again
@@ -130,9 +131,9 @@ class TestStripe(WebTestBase):
         self.assertEqual(reg.price, seminar.price)
         self.assertEqual(reg.payment_method, "Stripe")
         self.assertEqual(reg.transaction_id, "multistep mock id")
-        self.assertEqual(
-            reg.transaction_notes,
-            '{\n  "id": "multistep mock id", \n  "mock_key": "mock_value"\n}',
+        self.assertDictEqual(
+            json.loads(reg.transaction_notes),
+            {"id": "multistep mock id", "mock_key": "mock_value"},
         )
 
         # User should be redirected to the seminar page if they try to register again
