@@ -8,7 +8,7 @@
 {% block main %}
 	{% errors_for form %}
 
-	<form action="" method="POST">
+	<form action="" method="POST" id="seminar-registration">
 		{% fields_for form %}
 		<p>You are about to enroll on {{ seminar.title }}</p>
 		<p><input type="submit" value="Enroll" class="btn btn-primary"></p>
