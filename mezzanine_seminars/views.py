@@ -122,6 +122,13 @@ class SurveyResponseCreateView(SeminarDetailMixin, generic.CreateView):
     template_name = "seminars/survey_response_create.html"
 
     def dispatch(self, request, *args, **kwargs):
+        if not self.seminar.survey_questions.count():
+            messages.info(
+                request,
+                "This seminar doesn't have a survey",
+                fail_silently=True,
+            )
+            return redirect(self.seminar)
         if not self.registration:
             messages.info(
                 request,

@@ -62,7 +62,7 @@
 		<p>
 			{% if survey_response %}
 				<strong>You took the seminar survey on {{ survey_response.created|date }}.</strong>
-			{% else %}
+			{% elif seminar.survey_questions.count %}
 				<a href="{% url 'seminars:survey_response_create' seminar.slug %}" class="btn btn-primary">
 					Complete the post seminar survey
 				</a>

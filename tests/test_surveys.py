@@ -15,12 +15,8 @@ from .utils import WebTestBase
 
 
 class SurveyResponseCreateViewTest(WebTestBase):
-    def test_survey_response_create(self):
-        # Create a seminar with two required and two optional questions
-        seminar = G(Seminar, title="Seminar with registration", price=10)
-        for t in (SurveyQuestion.RATING_FIELD, SurveyQuestion.TEXT_FIELD):
-            for r in (True, False):
-                G(SurveyQuestion, seminar=seminar, field_type=t, required=r)
+    def test_access(self):
+        seminar = G(Seminar)
         url = reverse("seminars:survey_response_create", args=[seminar.slug])
 
         # Anonymous users should be sent to the login page
@@ -32,10 +28,27 @@ class SurveyResponseCreateViewTest(WebTestBase):
         self.get_literal_url(url)
         self.assertUrlsEqual(seminar.get_absolute_url())
 
-        # Register the user so they can take the survey
+        # Registered users should be sent back if there are no questions to answer
+        G(SeminarRegistration, seminar=seminar, purchaser=self.USER)
+        self.get_literal_url(url)
+        self.assertUrlsEqual(seminar.get_absolute_url())
+
+        # The page should load when at least one question is added
+        G(SurveyQuestion, seminar=seminar)
+        self.get_literal_url(url)
+        self.assertUrlsEqual(url)
+
+    def test_survey_response_create(self):
+        # Create a seminar with two required and two optional questions
+        seminar = G(Seminar, title="Seminar with survey", price=10)
         reg = G(SeminarRegistration, purchaser=self.USER, seminar=seminar)
+        for t in (SurveyQuestion.RATING_FIELD, SurveyQuestion.TEXT_FIELD):
+            for r in (True, False):
+                G(SurveyQuestion, seminar=seminar, field_type=t, required=r)
+        url = reverse("seminars:survey_response_create", args=[seminar.slug])
 
         # User should receive an error if they skip the 2 required fields
+        self.shortcut_login(username="user", password="pass")
         self.get_literal_url(url)
         self.submit("#seminar-survey [type='submit']")
         self.assertUrlsEqual(url)
