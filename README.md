@@ -3,7 +3,7 @@
 ![Workflow status](https://github.com/unplugstudio/mezzanine-seminars/workflows/Test%20and%20release/badge.svg)
 [![PyPI version](https://badge.fury.io/py/mezzanine-seminars.svg)](https://pypi.org/project/mezzanine-seminars/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mezzanine-seminars)](https://pypi.org/project/mezzanine-seminars/)
-[![Code style: Black](https://img.shields.io/badge/follows-semver-blue.svg)](https://github.com/psf/black)
+[![Follows: Semantic Versioning](https://img.shields.io/badge/follows-SemVer-blue.svg)](https://semver.org/)
 [![Code style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Seminar platform for [Mezzanine](http://mezzanine.jupo.org/) sites.
