@@ -1,8 +1,12 @@
 from __future__ import unicode_literals, absolute_import
 
+import unicodecsv as csv
+
 from copy import deepcopy
 
+from django.conf.urls import url
 from django.contrib import admin
+from django.shortcuts import get_object_or_404, HttpResponse
 
 from mezzanine.core.admin import (
     DisplayableAdmin,
@@ -76,6 +80,33 @@ class SeminarAdmin(DisplayableAdmin):
         # Copy the meta panel from PageAdmin
         deepcopy(DisplayableAdmin.fieldsets[1]),
     ]
+
+    def get_urls(self, *args, **kwargs):
+        return [
+            url(
+                r"^(?P<pk>[\d]+)/export/$",
+                self.admin_site.admin_view(self.export_registrations),
+                name="mezzanine_seminars_registration_export",
+            )
+        ] + super(SeminarAdmin, self).get_urls(*args, **kwargs)
+
+    def export_registrations(self, request, pk):
+        """
+        Admin view that generates a CSV export of all registrations on a Seminar.
+        """
+        seminar = get_object_or_404(Seminar, pk=pk)
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename={}.csv".format(
+            seminar.slug
+        )
+        # https://stackoverflow.com/a/44898198/1330003
+        response.write("\ufeff".encode("utf8"))
+
+        writer = csv.writer(response)
+        writer.writerow(SeminarRegistration.get_csv_columns())
+        for registration in seminar.registrations.all():
+            writer.writerow(registration.get_csv_row())
+        return response
 
 
 #################

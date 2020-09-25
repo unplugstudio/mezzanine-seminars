@@ -1,0 +1,8 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+	<li><a href="{% url 'admin:mezzanine_seminars_registration_export' object_id %}">
+		Export Registrations
+	</a></li>
+	{{ block.super }}
+{% endblock object-tools-items %}

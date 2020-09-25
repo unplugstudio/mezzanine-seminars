@@ -3,6 +3,7 @@ from __future__ import unicode_literals, absolute_import
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
+from django.template.defaultfilters import date
 
 from mezzanine.conf import settings
 from mezzanine.core.fields import FileField
@@ -107,3 +108,26 @@ class SeminarRegistration(TimeStamped):
 
     def __str__(self):
         return self.purchaser.get_full_name() or self.purchaser.username
+
+    @staticmethod
+    def get_csv_columns():
+        return [
+            "Registration",
+            "Email",
+            "Seminar",
+            "Date created",
+            "Price",
+            "Payment method",
+            "Transcation ID",
+        ]
+
+    def get_csv_row(self):
+        return (
+            unicode(self),
+            self.purchaser.email,
+            unicode(self.seminar),
+            date(self.created, "DATETIME_FORMAT"),
+            self.price,
+            self.payment_method,
+            self.transaction_id,
+        )
