@@ -123,3 +123,6 @@ class SeminarRegistrationAdmin(admin.ModelAdmin):
             },
         ),
     ]
+
+    def has_add_permission(self, *args, **kwargs):
+        return False  # Don't allow creating registrations
