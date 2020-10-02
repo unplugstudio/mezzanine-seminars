@@ -1,6 +1,7 @@
 include LICENSE
 include README.rst
 
+recursive-include mezzanine_seminars *.py
 recursive-include mezzanine_seminars/static *
 recursive-include mezzanine_seminars/templates *.html
 recursive-include mezzanine_seminars/templates *.txt
