@@ -12,4 +12,6 @@ class WebTestBase(FuncWebTestMixin, ShortcutLoginMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         super(WebTestBase, cls).setUpTestData()
-        cls.USER = User.objects.create_user(username="user", password="pass")
+        cls.USER = User.objects.create_user(
+            username="user", password="pass", email="test@test.com"
+        )

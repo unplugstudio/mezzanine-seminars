@@ -6,6 +6,7 @@ import unicodecsv as csv
 
 from io import BytesIO
 
+from django.core import mail
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 from django.test import override_settings
@@ -106,6 +107,14 @@ class SeminarRegistrationCreateViewTest(WebTestBase):
         # User should be redirected to the seminar page if they try to register again
         self.get_literal_url(url)
         self.assertUrlsEqual(seminar.get_absolute_url())
+
+        # A confirmation message should be sent
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to[0], self.USER.email)
+        self.assertIn(
+            "http://testserver" + seminar.get_absolute_url(),
+            mail.outbox[0].body,
+        )
 
 
 class SeminarAdminTest(WebTestBase):

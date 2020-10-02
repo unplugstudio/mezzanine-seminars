@@ -9,6 +9,7 @@ from django.utils.functional import cached_property
 from mezzanine.conf import settings
 from mezzanine.utils.views import paginate
 from mezzanine.utils.importing import import_dotted_path
+from mezzanine.utils.email import send_mail_template
 
 from mezzy.utils.decorators import method_decorator
 
@@ -99,10 +100,28 @@ class SeminarRegistrationCreateView(SeminarDetailMixin, generic.CreateView):
         kwargs.update({"seminar": self.seminar, "purchaser": self.request.user})
         return kwargs
 
+    def send_confirmation_email(self):
+
+        registration = self.object  # Set by form_valid()
+        send_mail_template(
+            subject="Seminar Registration Confirmation",
+            template="seminars/emails/registration_confirmation",
+            addr_from=None,  # Use address from settings
+            addr_to=registration.purchaser.email,
+            context={
+                "registration": registration,
+                "seminar_url": self.request.build_absolute_uri(
+                    registration.seminar.get_absolute_url()
+                ),
+            },
+            fail_silently=True,  # Fail silently to avoid failing the entire request
+        )
+
     def get_success_url(self):
         """
-        Redirect back to the seminar with full access now granted
+        Notify the user and redirect back to the seminar with full access now granted
         """
+        self.send_confirmation_email()
         messages.success(
             self.request,
             "You are now registered for this seminar",
