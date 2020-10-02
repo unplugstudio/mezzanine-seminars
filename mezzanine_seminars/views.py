@@ -101,13 +101,12 @@ class SeminarRegistrationCreateView(SeminarDetailMixin, generic.CreateView):
         return kwargs
 
     def send_confirmation_email(self):
-
         registration = self.object  # Set by form_valid()
         send_mail_template(
             subject="Seminar Registration Confirmation",
-            template="seminars/emails/registration_confirmation",
             addr_from=None,  # Use address from settings
             addr_to=registration.purchaser.email,
+            template="seminars/emails/registration_confirmation",
             context={
                 "registration": registration,
                 "seminar_url": self.request.build_absolute_uri(
