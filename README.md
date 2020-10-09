@@ -57,7 +57,7 @@ Some users might pay for seminar access without using the website, or you (the s
 
 > ACME Inc. has reached an agreement with you for 20 seats for Seminar XYZ. Site admins create the Purchase Code "acme" with the capacity limited to 20. Employees of ACME Inc. will now create their own accounts on the site and enter code "acme" during the registration step for Seminar XYZ instead of paying for their registration. Once the code has been used on 20 registrations it is no longer valid. Site admins will be able to see which code was used in the Seminar Registration admin to identify the 20 attendees from ACME. Multiple Purchase Codes can be active at the same time to allow enrolling multiple user groups, each with a set number of seats.
 
-Generally you will want to combine Registration Codes with an alternative payment method to give users a choice of which to use. For this reason the form `mezzanine_seminars.forms.BaseRegistrationCodeForm` is provided bo mixed in with other forms.
+Generally you will want to combine Registration Codes with an alternative payment method to give users a choice of which to use. For this reason the form `mezzanine_seminars.forms.BaseRegistrationCodeForm` is provided to be mixed in with other forms.
 
 For example, to allow users to register with Stripe OR Registration Codes:
 
