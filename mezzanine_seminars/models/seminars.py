@@ -1,5 +1,7 @@
 from __future__ import unicode_literals, absolute_import
 
+import re
+
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
@@ -11,6 +13,8 @@ from mezzanine.core.fields import FileField
 from mezzanine.core.models import Displayable, Slugged, RichText, TimeStamped
 
 from mezzy.utils.models import TitledInline
+
+WHITESPACE_RE = re.compile(r"\s+")
 
 
 class SeminarSubject(Slugged):
@@ -82,6 +86,39 @@ class SeminarContentArea(TitledInline, RichText):
     class Meta:
         verbose_name = "content area"
         verbose_name_plural = "content areas"
+
+
+@python_2_unicode_compatible
+class RegistrationCode(models.Model):
+    """
+    Special code that allows users to register for a seminar without paying
+    """
+
+    seminar = models.ForeignKey(
+        Seminar, on_delete=models.CASCADE, related_name="registration_codes"
+    )
+    code = models.CharField("Code", max_length=50)
+    available = models.PositiveIntegerField(
+        "Available",
+        help_text="This number will be updated automatically as users register",
+    )
+
+    class Meta:
+        ordering = ["code"]
+        unique_together = ("seminar", "code")
+
+    def __str__(self):
+        return self.code
+
+    @staticmethod
+    def normalize_code(code):
+        """
+        Normalize and clean registration codes
+        """
+        return WHITESPACE_RE.sub("", code.lower())
+
+    def clean(self):
+        self.code = self.normalize_code(self.code)
 
 
 @python_2_unicode_compatible

@@ -1,4 +1,5 @@
 from .seminars import (  # noqa
+    RegistrationCode,
     Seminar,
     SeminarContentArea,
     SeminarRegistration,

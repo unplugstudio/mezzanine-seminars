@@ -15,7 +15,7 @@ from ddf import G
 
 from mezzanine.core.models import CONTENT_STATUS_DRAFT, CONTENT_STATUS_PUBLISHED
 
-from mezzanine_seminars.models import Seminar, SeminarRegistration
+from mezzanine_seminars.models import Seminar, SeminarRegistration, RegistrationCode
 
 from .utils import WebTestBase
 
@@ -125,6 +125,46 @@ class SeminarAdminTest(WebTestBase):
             username="admin", email="a@b.com", password="admin"
         )
         cls.SEMINAR = G(Seminar, title="Test Seminar")
+
+    def test_purchase_code_admin(self):
+        self.shortcut_login(username="admin", password="admin")
+        self.get_url("admin:mezzanine_seminars_seminar_change", self.SEMINAR.pk)
+
+        # Purchase codes should be normalized when saved
+        self.fill_by_name(
+            {
+                "registration_codes-0-code": " TEST code ",  # Notice caps and spaces
+                "registration_codes-0-available": 1,
+            }
+        )
+        self.submit(".submit-row [name='_continue']")
+        purchase_code = RegistrationCode.objects.get()
+        self.assertEqual(purchase_code.seminar, self.SEMINAR)
+        self.assertEqual(purchase_code.code, "testcode")  # Normalized value
+        self.assertEqual(purchase_code.available, 1)
+
+        # Trying to save two identical codes should produce an error
+        self.fill_by_name(
+            {
+                "registration_codes-0-code": "testcode",
+                "registration_codes-0-available": 1,
+                "registration_codes-1-code": "testcode",
+                "registration_codes-1-available": 2,
+            }
+        )
+        self.submit(".submit-row [name='_continue']")
+        self.assertEqual(RegistrationCode.objects.count(), 1)
+        self.assertEqual(len(self.last_response.context["errors"]), 1)
+
+        # Different codes should be allowed
+        self.fill_by_name(
+            {
+                "registration_codes-1-code": "another",
+                "registration_codes-1-available": 2,
+            }
+        )
+        self.submit(".submit-row [name='_continue']")
+        self.assertEqual(RegistrationCode.objects.count(), 2)
 
     def test_seminar_admin(self):
         # Create registrations for export

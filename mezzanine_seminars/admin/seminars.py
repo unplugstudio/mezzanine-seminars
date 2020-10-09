@@ -15,6 +15,7 @@ from mezzanine.core.admin import (
 )
 
 from ..models import (
+    RegistrationCode,
     Seminar,
     SeminarSubject,
     SeminarContentArea,
@@ -37,6 +38,10 @@ class SeminarSubjectAdmin(admin.ModelAdmin):
 ###########
 
 
+class RegistrationCodeInlineAdmin(TabularDynamicInlineAdmin):
+    model = RegistrationCode
+
+
 class SeminarContentAreaInlineAdmin(StackedDynamicInlineAdmin):
     model = SeminarContentArea
     fields = ["title", "video_link", "content"]
@@ -50,7 +55,11 @@ class SurveyQuestionInlineAdmin(TabularDynamicInlineAdmin):
 
 @admin.register(Seminar)
 class SeminarAdmin(DisplayableAdmin):
-    inlines = [SeminarContentAreaInlineAdmin, SurveyQuestionInlineAdmin]
+    inlines = [
+        RegistrationCodeInlineAdmin,
+        SeminarContentAreaInlineAdmin,
+        SurveyQuestionInlineAdmin,
+    ]
     list_display = ["title", "publish_date", "status", "featured", "admin_link"]
     list_filter = ["status", "featured"]
     list_editable = ["status", "featured"]

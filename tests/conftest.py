@@ -42,7 +42,7 @@ def after_django_setup():
     from mezzanine_seminars.models import Seminar
 
     # When creating Seminars we don't want to create extra sites
-    teach(Seminar, site=None)
+    teach(Seminar, site=None, featured_image="")
 
 
 def pytest_report_header(config):
