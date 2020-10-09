@@ -1,6 +1,6 @@
 # Mezzanine Seminars
 
-![Workflow status](https://github.com/unplugstudio/mezzanine-seminars/workflows/Test%20and%20release/badge.svg)
+[![Workflow status](https://github.com/unplugstudio/mezzanine-seminars/workflows/Test%20and%20release/badge.svg)](https://github.com/unplugstudio/mezzanine-seminars/actions)
 [![PyPI version](https://badge.fury.io/py/mezzanine-seminars.svg)](https://pypi.org/project/mezzanine-seminars/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mezzanine-seminars)](https://pypi.org/project/mezzanine-seminars/)
 [![Follows: Semantic Versioning](https://img.shields.io/badge/follows-SemVer-blue.svg)](https://semver.org/)
