@@ -40,10 +40,11 @@ class StripeRegistrationForm(BaseSeminarRegistrationForm):
                     api_key=self.api_key,
                     payment_method=payment_method_id,
                     amount=int(self.seminar.price * 100),
-                    description="Seminar Registration: {}".format(self.seminar),
                     currency="usd",
                     confirmation_method="manual",
                     confirm=True,
+                    receipt_email=self.purchaser.email,
+                    description="Seminar Registration: {}".format(self.seminar),
                 )
             elif payment_intent_id:
                 # Multi step payment
