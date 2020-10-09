@@ -1,8 +1,11 @@
 from __future__ import unicode_literals, absolute_import
 
-from django import forms
+import json
 
-from ..models import SeminarRegistration
+from django import forms
+from django.db.models import F
+
+from ..models import SeminarRegistration, RegistrationCode
 
 TRANSACTION_KEYS = ["payment_method", "transaction_id", "transaction_notes"]
 MISSING_KEY = "Key `{}` is missing from return value of `{}.execute_transaction()`"
@@ -71,4 +74,42 @@ class SeminarRegistrationForm(BaseSeminarRegistrationForm):
             "payment_method": "Default",
             "transaction_id": "",
             "transaction_notes": "",
+        }
+
+
+class BaseRegistrationCodeForm(BaseSeminarRegistrationForm):
+    """
+    Form with support for registration codes
+    Combine with another form that supports a different registration method
+    """
+
+    code = forms.CharField(label="Register with Code", max_length=50, required=False)
+
+    def clean_code(self):
+        code = self.cleaned_data.get("code", "")
+        return RegistrationCode.normalize_code(code)
+
+    def execute_transaction(self):
+        """
+        Create a registration using the code (if provided)
+        """
+        code = self.cleaned_data.get("code")
+        if not code:
+            # No code was provided, proceed as usual
+            return super(BaseRegistrationCodeForm, self).execute_transaction()
+
+        try:
+            registration_code = RegistrationCode.objects.get(
+                code=code, seminar=self.seminar, available__gt=0
+            )
+        except RegistrationCode.DoesNotExist:
+            raise forms.ValidationError("The registration code is not valid")
+
+        registration_code.available = F("available") - 1
+        registration_code.save()
+        registration_code.refresh_from_db()  # Get the new available number
+        return {
+            "payment_method": "Registration code",
+            "transaction_id": code,
+            "transaction_notes": json.dumps({"available": registration_code.available}),
         }

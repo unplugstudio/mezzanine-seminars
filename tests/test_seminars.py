@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import json
+
 import unicodecsv as csv
 
 from io import BytesIO
@@ -115,6 +117,62 @@ class SeminarRegistrationCreateViewTest(WebTestBase):
             "http://testserver" + seminar.get_absolute_url(),
             mail.outbox[0].body,
         )
+
+    @override_settings(
+        SEMINARS_REGISTRATION_FORM="mezzanine_seminars.forms.BaseRegistrationCodeForm"
+    )
+    def test_registration_code(self):
+        seminar = G(Seminar, title="Seminar with registration", price=10)
+        reg_code = G(RegistrationCode, seminar=seminar, code="test", available=1)
+        url = reverse("seminars:registration_create", args=[seminar.slug])
+
+        # Anonymous users should be sent to the login page
+        response = self.get_literal_url(url)
+        self.assertEqual(response.request.path, reverse("login"))
+
+        # Logged in users should have access
+        self.shortcut_login(username="user", password="pass")
+        self.get_literal_url(url)
+        self.assertTextPresent(seminar.title)
+
+        # Leaving the registration code empty should crash the site
+        # This is by design, requiring developers to provide a fallback for empty codes
+        with self.assertRaises(NotImplementedError):
+            self.submit("#seminar-registration [type='submit']")
+
+        # User should get an error if using an invalid code
+        self.get_literal_url(url)
+        self.fill_by_name({"code": "invalid code"})
+        self.submit("#seminar-registration [type='submit']")
+        self.assertEqual(len(self.last_response.context["form"].errors), 1)
+        self.assertEqual(SeminarRegistration.objects.count(), 0)
+
+        # User should get an error if using a valid but depleted code
+        reg_code.available = 0
+        reg_code.save()
+        self.fill_by_name({"code": "test"})  # Code is valid but depleted
+        self.submit("#seminar-registration [type='submit']")
+        self.assertEqual(len(self.last_response.context["form"].errors), 1)
+        self.assertEqual(SeminarRegistration.objects.count(), 0)
+
+        # User should be able to register with a valid and available code
+        # It shouldn't matter if the code is mixed case and has spaces
+        reg_code.available = 1
+        reg_code.save()
+        self.fill_by_name({"code": " T eSt "})
+        self.submit("#seminar-registration [type='submit']")
+        self.assertUrlsEqual(seminar.get_absolute_url())
+
+        reg = SeminarRegistration.objects.get()
+        self.assertEqual(reg.purchaser, self.USER)
+        self.assertEqual(reg.seminar, seminar)
+        self.assertEqual(reg.price, seminar.price)
+        self.assertEqual(reg.payment_method, "Registration code")
+        self.assertEqual(reg.transaction_id, reg_code.code)
+        self.assertDictEqual(json.loads(reg.transaction_notes), {"available": 0})
+
+        reg_code.refresh_from_db()
+        self.assertEqual(reg_code.available, 0)
 
 
 class SeminarAdminTest(WebTestBase):
