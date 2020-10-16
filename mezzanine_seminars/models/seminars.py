@@ -5,6 +5,7 @@ import re
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.six import text_type
 from django.utils.timezone import localtime
 from django.template.defaultfilters import date
 
@@ -161,9 +162,9 @@ class SeminarRegistration(TimeStamped):
 
     def get_csv_row(self):
         return (
-            unicode(self),
+            text_type(self),
             self.purchaser.email,
-            unicode(self.seminar),
+            text_type(self.seminar),
             date(localtime(self.created), "DATETIME_FORMAT"),
             self.price,
             self.payment_method,
