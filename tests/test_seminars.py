@@ -24,6 +24,13 @@ from .utils import WebTestBase
 User = get_user_model()
 
 
+def row_data(registration):
+    """
+    Override the CSV row data generation
+    """
+    return (registration.purchaser.first_name,)
+
+
 class SeminarListViewTest(WebTestBase):
     def test_access(self):
         seminar1 = G(Seminar, title="First Seminar")
@@ -288,6 +295,31 @@ class SeminarAdminTest(WebTestBase):
         self.assertEqual(export[2][4], "3.00")
         self.assertEqual(export[2][5], "Method 2")
         self.assertEqual(export[2][6], "Transaction 2")
+
+        # The export columns and row data should be customizable via settings
+        fn_path = "{f.__module__}.{f.__name__}".format(f=row_data)
+        with override_settings(
+            SEMINARS_REGISTRATION_EXPORT_CSV_COLUMN_NAMES=("Custom Column",),
+            SEMINARS_REGISTRATION_EXPORT_CSV_ROW_DATA=fn_path,
+        ):
+            self.get_url("admin:mezzanine_seminars_seminar_change", self.SEMINAR.pk)
+            self.follow_link(
+                "[href='{}']".format(
+                    reverse(
+                        "admin:mezzanine_seminars_registration_export",
+                        args=[self.SEMINAR.pk],
+                    )
+                )
+            )
+
+            # The export should contain custom registration data
+            csv_bytes = BytesIO(self.last_response.content)
+            export = list(csv.reader(csv_bytes))
+            self.assertEqual(len(export), 3)  # Column names + 2 registrations
+
+            self.assertEqual(export[0], ["\ufeffCustom Column"])
+            self.assertEqual(export[1], ["Jóhn"])
+            self.assertEqual(export[2], ["Jane"])
 
     def test_registration_admin(self):
         registration = G(SeminarRegistration, seminar=self.SEMINAR, purchaser=self.USER)

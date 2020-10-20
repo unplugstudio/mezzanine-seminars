@@ -148,25 +148,17 @@ class SeminarRegistration(TimeStamped):
     def __str__(self):
         return self.purchaser.get_full_name() or self.purchaser.username
 
-    @staticmethod
-    def get_csv_columns():
-        return [
-            "Registration",
-            "Email",
-            "Seminar",
-            "Date created",
-            "Price",
-            "Payment method",
-            "Transcation ID",
-        ]
 
-    def get_csv_row(self):
-        return (
-            text_type(self),
-            self.purchaser.email,
-            text_type(self.seminar),
-            date(localtime(self.created), "DATETIME_FORMAT"),
-            self.price,
-            self.payment_method,
-            self.transaction_id,
-        )
+def registration_row_data(registration):
+    """
+    Generate CSV row data for a single exported registration
+    """
+    return (
+        text_type(registration),
+        registration.purchaser.email,
+        text_type(registration.seminar),
+        date(localtime(registration.created), "DATETIME_FORMAT"),
+        registration.price,
+        registration.payment_method,
+        registration.transaction_id,
+    )

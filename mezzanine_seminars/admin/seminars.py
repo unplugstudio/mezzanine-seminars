@@ -7,7 +7,9 @@ from copy import deepcopy
 from django.conf.urls import url
 from django.contrib import admin
 from django.shortcuts import get_object_or_404, HttpResponse
+from django.utils.module_loading import import_string
 
+from mezzanine.conf import settings
 from mezzanine.core.admin import (
     DisplayableAdmin,
     StackedDynamicInlineAdmin,
@@ -103,6 +105,8 @@ class SeminarAdmin(DisplayableAdmin):
         """
         Admin view that generates a CSV export of all registrations on a Seminar.
         """
+        col_names = settings.SEMINARS_REGISTRATION_EXPORT_CSV_COLUMN_NAMES
+        get_row_data = import_string(settings.SEMINARS_REGISTRATION_EXPORT_CSV_ROW_DATA)
         seminar = get_object_or_404(Seminar, pk=pk)
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename={}.csv".format(
@@ -112,9 +116,9 @@ class SeminarAdmin(DisplayableAdmin):
         response.write("\ufeff".encode("utf8"))
 
         writer = csv.writer(response)
-        writer.writerow(SeminarRegistration.get_csv_columns())
+        writer.writerow(col_names)
         for registration in seminar.registrations.all():
-            writer.writerow(registration.get_csv_row())
+            writer.writerow(get_row_data(registration))
         return response
 
 
