@@ -19,7 +19,7 @@ class SurveyResponseForm(forms.ModelForm):
         Create dynamic fields for each question in the Seminar.
         """
         self.registration = registration
-        self.questions = registration.seminar.survey_questions.order_by("field_type")
+        self.questions = registration.seminar.survey_questions.all()
         super(SurveyResponseForm, self).__init__(*args, **kwargs)
 
         rating_choices = [(i, i) for i in range(1, 6)]  # 1 to 5
