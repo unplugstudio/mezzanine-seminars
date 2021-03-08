@@ -1,0 +1,12 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools %}
+  {{ block.super }}
+  <ul class="object-tools">
+    {% block object-tools-items %}
+      <li><a href="{% url "admin:mezzanine_seminars_surveys_export" %}">
+        Export Surveys
+      </a></li>
+    {% endblock object-tools-items %}
+  </ul>
+{% endblock object-tools %}
